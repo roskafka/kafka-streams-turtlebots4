@@ -1,19 +1,20 @@
 import time
 from datetime import datetime
 
-from confluent_kafka.avro import AvroProducer
-from confluent_kafka.avro.cached_schema_registry_client import CachedSchemaRegistryClient
+from confluent_kafka import Producer
+from confluent_kafka.schema_registry.avro import AvroSerializer
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
 
-sr = CachedSchemaRegistryClient({"url": "http://localhost:8081"})
+sr = SchemaRegistryClient({"url": "http://localhost:8081"})
 
-greetings_schema_value = sr.get_latest_schema("in_1-value")[1]
-greetings_schema_key = sr.get_latest_schema("in_1-key")[1]
+greetings_schema_value = sr.get_latest_version("in_1-value")
+greetings_schema_key = sr.get_latest_version("in_1-key")
 
-# producer with schema-registry and avro
-producer = AvroProducer({
-    'bootstrap.servers': 'localhost:9092',
-    'schema.registry.url': 'http://localhost:8081',
-}, default_value_schema=greetings_schema_value, default_key_schema=greetings_schema_key)
+value_serializer = AvroSerializer(schema_registry_client=sr, schema_str=greetings_schema_value.schema)
+key_serializer = StringSerializer("utf_8")
+
+producer = Producer({"bootstrap.servers": "localhost:9092"})
 
 
 def send_position(x, y, robot):
@@ -23,7 +24,10 @@ def send_position(x, y, robot):
         "info": "Hello world",
         "age": 42
     }
-    producer.produce(topic="in_1", key=data, value=data)
+    topic = "in_1"
+    producer.produce(topic=topic,
+                     key=key_serializer("rob stark"),
+                     value=value_serializer(data, SerializationContext(topic, MessageField.VALUE)))
     print(f"Sent position {robot=} {x=} {y=} now={datetime.now()}")
 
 

@@ -39,9 +39,9 @@ public class Ex {
         final Map<String, String> serdeConfig = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
         greetingSerde.configure(serdeConfig, false);
 
-        builder.stream(INPUT_TOPIC, Consumed.with(greetingSerde, greetingSerde))
+        builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
                 .peek((key, value) -> logger.info("key: {}, value: {}", key, value))
-                .to(OUTPUT_TOPIC, Produced.with(greetingSerde, greetingSerde));
+                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), greetingSerde));
 
         return builder.build();
     }
