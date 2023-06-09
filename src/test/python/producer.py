@@ -14,7 +14,7 @@ greetings_schema_key = sr.get_latest_version("in_1-key")
 value_serializer = AvroSerializer(schema_registry_client=sr, schema_str=greetings_schema_value.schema)
 key_serializer = StringSerializer("utf_8")
 
-producer = Producer({"bootstrap.servers": "localhost:9092"})
+producer = Producer({"bootstrap.servers": bootstrap_servers})
 
 
 def send_position(x, y, robot):
