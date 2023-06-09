@@ -1,26 +1,36 @@
-import json
 import time
 from datetime import datetime
 
-from kafka import KafkaProducer
+from confluent_kafka.avro import AvroProducer
+from confluent_kafka.avro.cached_schema_registry_client import CachedSchemaRegistryClient
 
-from models import Message, PayloadPosition, MetaData
+sr = CachedSchemaRegistryClient({"url": "http://localhost:8081"})
 
-producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: v.json().encode('utf-8'))
+greetings_schema_value = sr.get_latest_schema("in_1-value")[1]
+greetings_schema_key = sr.get_latest_schema("in_1-key")[1]
+
+# producer with schema-registry and avro
+producer = AvroProducer({
+    'bootstrap.servers': 'localhost:9092',
+    'schema.registry.url': 'http://localhost:8081',
+}, default_value_schema=greetings_schema_value, default_key_schema=greetings_schema_key)
 
 
 def send_position(x, y, robot):
-    data = Message(
-        payload=PayloadPosition(x=x, y=y, theta=0, linear_velocity=1, angular_velocity=1),
-        metadata=MetaData(mapping=f"robot-{robot}", source="positions", type="turtlesim/msg/Pose")
-    )
-    producer.send('in_1', key=f"robot-{robot}".encode("utf-8"), value=data, headers=[("type", b"position")])
+    # serialize avro Greetings
+    data = {
+        "name": "Klaus",
+        "info": "Hello world",
+        "age": 42
+    }
+    producer.produce(topic="in_1", key=data, value=data)
     print(f"Sent position {robot=} {x=} {y=} now={datetime.now()}")
 
 
 def send_positions(x1, y1, x2, y2):
     send_position(x1, y1, 1)
     send_position(x2, y2, 2)
+
 
 time.sleep(1)
 print("Start sending")
