@@ -1,6 +1,6 @@
 quarkus:
   kafka-streams:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 141.28.73.94:9092
     schema-registry-url: http://localhost:8081
     application-id: turtlebots4
     topics: in_1,out_1
