@@ -1,6 +1,6 @@
 package de.hfu;
 
-import hfu.avro.serialisation.Greeting;
+import hfu.avro.serialisation.Diagnostics;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -34,7 +34,7 @@ public class Ex {
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        Serde<Greeting> greetingSerde = new SpecificAvroSerde<>();
+        Serde<Diagnostics> greetingSerde = new SpecificAvroSerde<>();
 
         final Map<String, String> serdeConfig = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
         greetingSerde.configure(serdeConfig, false);
