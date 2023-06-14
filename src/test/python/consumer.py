@@ -7,10 +7,12 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
 
 bootstrap_servers = "141.28.73.94:9092"
+bootstrap_servers = "localhost:9092"
 schema_registry_url = "http://141.28.73.94:8081"
+schema_registry_url = "http://localhost:8081"
 
 sr = SchemaRegistryClient({"url": schema_registry_url})
-greetings_schema_value = sr.get_latest_version("in_1-value")
+greetings_schema_value = sr.get_latest_version("out_1-value")
 
 value_deserializer = AvroDeserializer(schema_registry_client=sr, schema_str=greetings_schema_value.schema)
 

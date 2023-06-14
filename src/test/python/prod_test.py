@@ -25,6 +25,8 @@ def send_positions(x1, y1, x2, y2):
 
 time.sleep(1)
 print("Start sending")
+send_positions(10, 10, 20, 20)
+exit(0)
 for i in range(3):
     print(f"Round: {i}")
     send_positions(10, 10, 20, 20)
