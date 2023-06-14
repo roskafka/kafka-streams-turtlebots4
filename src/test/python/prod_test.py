@@ -6,7 +6,8 @@ from kafka import KafkaProducer
 
 from models import Message, PayloadPosition, MetaData
 
-producer = KafkaProducer(bootstrap_servers="141.28.73.94:9092", value_serializer=lambda v: v.json().encode('utf-8'))
+# producer = KafkaProducer(bootstrap_servers="141.28.73.94:9092", value_serializer=lambda v: v.json().encode('utf-8'))
+producer = KafkaProducer(bootstrap_servers="localhost:9092", value_serializer=lambda v: v.json().encode('utf-8'))
 
 
 def send_position(x, y, robot):

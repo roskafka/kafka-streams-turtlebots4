@@ -6,9 +6,11 @@ from confluent_kafka.schema_registry.avro import AvroSerializer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.serialization import StringSerializer, SerializationContext, MessageField
 
-bootstrap_servers = "141.28.73.94:9092"
 
-sr = SchemaRegistryClient({"url": "http://localhost:8081"})
+bootstrap_servers = "141.28.73.94:9092"
+schema_registry_url = "141.28.73.94:8081"
+
+sr = SchemaRegistryClient({"url": schema_registry_url})
 
 greetings_schema_value = sr.get_latest_version("in_1-value")
 greetings_schema_key = sr.get_latest_version("in_1-key")
@@ -22,9 +24,7 @@ producer = Producer({"bootstrap.servers": bootstrap_servers})
 def send_position(x, y, robot):
     # serialize avro Greetings
     data = {
-        "name": "Klaus",
-        "info": "Hello world",
-        "age": 42
+        "value": "Ich mag keine Bananen",
     }
     topic = "in_1"
     producer.produce(topic=topic,
