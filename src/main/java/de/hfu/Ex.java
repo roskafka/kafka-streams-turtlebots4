@@ -10,6 +10,8 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.StoreBuilder;
+import org.apache.kafka.streams.state.Stores;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,19 +45,18 @@ public class Ex {
         greetingSerde.configure(serdeConfig, false);
         lightringLedsSerde.configure(serdeConfig, false);
 
+        // create store
+        StoreBuilder storeBuilder = Stores.keyValueStoreBuilder(
+                Stores.inMemoryKeyValueStore(HazardProcessor.STORE_NAME),
+                Serdes.String(),
+                Serdes.String());
+
+        // register store
+        builder.addStateStore(storeBuilder);
+
         builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
-                .filter((key, value) -> value.getDetections().size() > 0)
+                .process(HazardProcessor::new, HazardProcessor.STORE_NAME)
                 .peek((key, value) -> logger.info("key: {}, value: {}", key, value))
-                // all 6 leds red
-                .map((key, value) -> {
-                    List<LedColor> leds = new ArrayList<>();
-                    for (int i = 0; i < 6; i++) {
-                        leds.add(new LedColor(255, 0, 0));
-                    }
-                    int currentSeconds = (int) (System.currentTimeMillis() / 1000);
-                    Header header = new Header(new Time(currentSeconds, 0), "0");
-                    return new KeyValue<>(key, new LightringLeds(header, leds, false));
-                })
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
 
         return builder.build();

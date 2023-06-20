@@ -1,0 +1,65 @@
+{
+  "type": "record",
+  "name": "LightringLeds",
+  "namespace": "de.hfu",
+  "fields": [
+    {
+      "name": "header",
+      "type": {
+        "type": "record",
+        "name": "Header",
+        "fields": [
+          {
+            "name": "stamp",
+            "type": {
+              "type": "record",
+              "name": "Time",
+              "fields": [
+                {
+                  "name": "sec",
+                  "type": "int"
+                },
+                {
+                  "name": "nanosec",
+                  "type": "int"
+                }
+              ]
+            }
+          },
+          {
+            "name": "frame_id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "leds",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "LedColor",
+          "fields": [
+            {
+              "name": "red",
+              "type": "int"
+            },
+            {
+              "name": "green",
+              "type": "int"
+            },
+            {
+              "name": "blue",
+              "type": "int"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "override_system",
+      "type": "boolean"
+    }
+  ]
+}
