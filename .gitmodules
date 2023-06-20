@@ -1,4 +1,0 @@
-[submodule "src/main/avro"]
-	path = src/main/avro
-	url = https://gitlab.informatik.hs-furtwangen.de/ss23-forschungsprojekt-7/message-schemas.git
-
