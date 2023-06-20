@@ -1,3 +1,5 @@
+src/main/avro
+
 #Maven
 target/
 pom.xml.tag
