@@ -9,6 +9,11 @@ If you want to learn more about Quarkus, please visit its website: https://quark
 You can run your application in dev mode that enables live coding using:
 
 ```shell script
+# download avro schemas
+./mvnw io.confluent:kafka-schema-registry-maven-plugin:7.4.0:download
+# build java classes from avro schemas
+./mvnw compile
+# run application
 ./mvnw compile quarkus:dev
 ```
 

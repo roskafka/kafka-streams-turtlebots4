@@ -19,7 +19,7 @@ import java.util.Map;
 @ApplicationScoped
 public class Ex {
 
-    private static final String INPUT_TOPIC = "roskafka-battery";
+    private static final String INPUT_TOPIC = "roskafka-hazards";
     private static final String OUTPUT_TOPIC = "out_1";
 
     private static final Logger logger = LoggerFactory.getLogger(Ex.class);
@@ -33,7 +33,7 @@ public class Ex {
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        Serde<BatteryState> greetingSerde = new SpecificAvroSerde<>();
+        Serde<HazardDetectionVector> greetingSerde = new SpecificAvroSerde<>();
 
         final Map<String, String> serdeConfig = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
         greetingSerde.configure(serdeConfig, false);
