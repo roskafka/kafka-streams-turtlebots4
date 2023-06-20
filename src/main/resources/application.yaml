@@ -1,7 +1,7 @@
 quarkus:
   kafka-streams:
     application-id: turtlebots4
-    topics: in_1,out_1
+    topics: roskafka-battery
 
 "%dev":
   quarkus:

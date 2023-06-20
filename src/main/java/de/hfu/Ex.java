@@ -1,6 +1,5 @@
 package de.hfu;
 
-import hfu.avro.serialisation.Diagnostics;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -20,7 +19,7 @@ import java.util.Map;
 @ApplicationScoped
 public class Ex {
 
-    private static final String INPUT_TOPIC = "in_1";
+    private static final String INPUT_TOPIC = "roskafka-battery";
     private static final String OUTPUT_TOPIC = "out_1";
 
     private static final Logger logger = LoggerFactory.getLogger(Ex.class);
@@ -34,14 +33,14 @@ public class Ex {
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        Serde<Diagnostics> greetingSerde = new SpecificAvroSerde<>();
+        Serde<BatteryState> greetingSerde = new SpecificAvroSerde<>();
 
         final Map<String, String> serdeConfig = Collections.singletonMap("schema.registry.url", schemaRegistryUrl);
         greetingSerde.configure(serdeConfig, false);
 
         builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
-                .peek((key, value) -> logger.info("key: {}, value: {}", key, value))
-                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), greetingSerde));
+                .peek((key, value) -> logger.info("key: {}, value: {}", key, value));
+                //.to(OUTPUT_TOPIC, Produced.with(Serdes.String(), greetingSerde));
 
         return builder.build();
     }

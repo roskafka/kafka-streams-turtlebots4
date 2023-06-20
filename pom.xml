@@ -109,7 +109,7 @@
                     </schemaRegistryUrls>
                     <outputDirectory>src/main/avro</outputDirectory>
                     <subjectPatterns>
-                        <param>^positions-(key|value)$</param>
+                        <param>^roskafka-(.*)-(key|value)$</param>
                     </subjectPatterns>
                 </configuration>
             </plugin>
