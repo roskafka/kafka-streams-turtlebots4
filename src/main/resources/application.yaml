@@ -1,7 +1,7 @@
 quarkus:
   kafka-streams:
     application-id: turtlebots4
-    topics: roskafka-hazards
+    topics: roskafka-hazards,kafkaros-leds
 
 "%dev":
   quarkus:

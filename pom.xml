@@ -110,6 +110,7 @@
                     <outputDirectory>src/main/avro</outputDirectory>
                     <subjectPatterns>
                         <param>^roskafka-(.*)-(key|value)$</param>
+                        <param>^kafkaros-(.*)-(key|value)$</param>
                     </subjectPatterns>
                 </configuration>
             </plugin>
