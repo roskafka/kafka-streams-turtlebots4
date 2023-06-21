@@ -4,6 +4,15 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
+## Dependencies
+
+1. Adjust broker address in `KAFKA_ADVERTISED_LISTENERS` in docker-compose.yml
+2. Create instance of Confluent Kafka and Confluent Schema Registry using Docker Compose:
+
+```shell script
+docker compose up
+```
+
 ## Running the application in dev mode
 
 You can run your application in dev mode that enables live coding using:
