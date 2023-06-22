@@ -2,13 +2,15 @@
 
 ## Dependencies
 
-1. Specify host IP in `HOST_IP` environment variable: this will allow ROS to communicate with the Kafka broker.
+1. Install Java 17
+
+2. Specify host IP in `HOST_IP` environment variable: this will allow ROS to communicate with the Kafka broker.
 
 ```shell script
 export HOST_IP=<host_ip>
 ```
 
-2. Create instance of Confluent Kafka and Confluent Schema Registry using Docker Compose:
+3. Create instance of Confluent Kafka and Confluent Schema Registry using Docker Compose:
 
 ```shell script
 docker compose up
