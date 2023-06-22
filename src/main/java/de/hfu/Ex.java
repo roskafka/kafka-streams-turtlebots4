@@ -9,13 +9,17 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.internals.TimeWindow;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.Stores;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +59,27 @@ public class Ex {
         builder.addStateStore(storeBuilder);
 
         builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
-                .process(HazardProcessor::new, HazardProcessor.STORE_NAME)
+                .groupByKey()
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(3)).advanceBy(Duration.ofSeconds(1)))
+                // send red leds, when in window 3 or more hazards in every message
+                .aggregate(
+                        () -> true,
+                        (key, value, isHazard) -> value.getDetections().size() >= 3 && isHazard
+                )
+                .toStream()
+                .map((key, isHazard) -> {
+                    List<LedColor> leds = new ArrayList<>();
+                    for (int i = 0; i < 6; i++) {
+                        if (isHazard){
+                            leds.add(new LedColor(255, 0, 0));
+                        } else {
+                            leds.add(new LedColor(0, 255, 0));
+                        }
+                    }
+                    long currentSeconds = key.window().start() / 1000;
+                    Header header = new Header(new Time((int) currentSeconds, 0), "0");
+                    return new KeyValue<>(key.key(), new LightringLeds(header, leds, true));
+                })
                 .peek((key, value) -> logger.info("key: {}, value: {}", key, value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
 
