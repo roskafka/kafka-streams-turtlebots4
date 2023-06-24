@@ -59,7 +59,7 @@ public class Ex {
 
 
         builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
-                .process(HazardProcessor::new, HazardProcessor.STORE_NAME)
+                .mapValues(value -> value.getDetections().size() > 0 ? HazardProcessor.STATE_HAZARD : HazardProcessor.STATE_NO_HAZARD)
                 //.peek((key, value) -> logger.info("before key: {}, value: {}", key, value))
                 .to(INNER_TOPIC, Produced.with(Serdes.String(), Serdes.String()));
 
@@ -72,6 +72,7 @@ public class Ex {
                 )
                 .suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()))
                 .toStream()
+                .process(HazardProcessor::new, HazardProcessor.STORE_NAME)
                 .peek((key, value) -> logger.info("out key: {}, value: {}", key, value))
                 .map((key, value) -> {
                     List<LedColor> leds = new ArrayList<>();
@@ -82,9 +83,8 @@ public class Ex {
                             leds.add(new LedColor(0, 255, 0));
                         }
                     }
-                    long currentSeconds = key.window().start() / 1000;
-                    Header header = new Header(new Time((int) currentSeconds, 0), "0");
-                    return new KeyValue<>(key.key(), new LightringLeds(header, leds, true));
+                    Header header = new Header(new Time((int) System.currentTimeMillis(), 0), "0");
+                    return new KeyValue<>(key, new LightringLeds(header, leds, true));
                 })
                 .peek((key, value) -> logger.info("final key: {}, value: {}", key, value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
