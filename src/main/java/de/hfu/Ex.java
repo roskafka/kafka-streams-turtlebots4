@@ -29,6 +29,7 @@ import java.util.Map;
 public class Ex {
 
     private static final String INPUT_TOPIC = "roskafka-hazards";
+    private static final String INNER_TOPIC = "hazards";
     private static final String OUTPUT_TOPIC = "kafkaros-leds";
 
     private static final Logger logger = LoggerFactory.getLogger(Ex.class);
@@ -59,14 +60,49 @@ public class Ex {
         builder.addStateStore(storeBuilder);
 
         builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
+                .process(HazardProcessor::new, HazardProcessor.STORE_NAME)
+                .peek((key, value) -> logger.info("before key: {}, value: {}", key, value))
+                .to(INNER_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
+
+        builder.stream(INNER_TOPIC, Consumed.with(Serdes.String(), lightringLedsSerde))
+                .groupByKey()
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(3)).advanceBy(Duration.ofSeconds(1)))
+                .aggregate(
+                        () -> 0,
+                        (key, value, numDetections) -> (value.getLeds().get(0).getGreen() == 0 ? 1 : 0) + numDetections,
+                        Materialized.with(Serdes.String(), Serdes.Integer())
+                )
+                .toStream()
+                .peek((key, value) -> logger.info("after key: {}, value: {}", key, value))
+                .filter((key, value) -> value > 0)
+                .map((key, value) -> {
+                    List<LedColor> leds = new ArrayList<>();
+                    for (int i = 0; i < 6; i++) {
+                        if (value > 0){
+                            leds.add(new LedColor(255, 0, 0));
+                        } else {
+                            leds.add(new LedColor(0, 255, 0));
+                        }
+                    }
+                    long currentSeconds = key.window().start() / 1000;
+                    Header header = new Header(new Time((int) currentSeconds, 0), "0");
+                    return new KeyValue<>(key.key(), new LightringLeds(header, leds, true));
+                })
+                .peek((key, value) -> logger.info("final key: {}, value: {}", key, value))
+                .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
+
+        /*
+        builder.stream(INPUT_TOPIC, Consumed.with(Serdes.String(), greetingSerde))
                 .groupByKey()
                 .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofSeconds(3)).advanceBy(Duration.ofSeconds(1)))
                 // send red leds, when in window 3 or more hazards in every message
                 .aggregate(
-                        () -> true,
-                        (key, value, isHazard) -> value.getDetections().size() >= 3 && isHazard
+                        () -> 0,
+                        (key, value, numDetections) -> value.getDetections().size() + numDetections,
+                        Materialized.with(Serdes.String(), Serdes.Integer())
                 )
                 .toStream()
+                .mapValues((numHazards) -> numHazards > 2)
                 .map((key, isHazard) -> {
                     List<LedColor> leds = new ArrayList<>();
                     for (int i = 0; i < 6; i++) {
@@ -82,6 +118,8 @@ public class Ex {
                 })
                 .peek((key, value) -> logger.info("key: {}, value: {}", key, value))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), lightringLedsSerde));
+
+         */
 
         return builder.build();
     }

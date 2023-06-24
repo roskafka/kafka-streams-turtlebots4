@@ -19,9 +19,6 @@ public class HazardProcessor implements Processor<String, HazardDetectionVector,
     private static final String STATE_HAZARD = "HAZARD";
     private static final String STATE_NO_HAZARD = "NO_HAZARD";
 
-    private int lastSent = 0;
-    private static final int SEND_INTERVAL_SECONDS = 1;
-
     @Override
     public void init(ProcessorContext<String, LightringLeds> context) {
         Processor.super.init(context);
@@ -39,7 +36,7 @@ public class HazardProcessor implements Processor<String, HazardDetectionVector,
         }
         boolean isCurrentStateHazard = currentState.equals(STATE_HAZARD);
         int currentSeconds = (int) (System.currentTimeMillis() / 1000);
-        if (hazardDetected != isCurrentStateHazard || currentSeconds - SEND_INTERVAL_SECONDS > lastSent) {
+        if (hazardDetected != isCurrentStateHazard) {
             String state = hazardDetected ? STATE_HAZARD : STATE_NO_HAZARD;
             setState(record.key(), state);
             List<LedColor> leds = new ArrayList<>();
@@ -50,7 +47,6 @@ public class HazardProcessor implements Processor<String, HazardDetectionVector,
                     leds.add(new LedColor(0, 255, 0));
                 }
             }
-            lastSent = currentSeconds;
             Header header = new Header(new Time(currentSeconds, 0), "0");
             LightringLeds lightringLeds = new LightringLeds(header, leds, true);
             Record<String, LightringLeds> ledRecord = new Record<>(record.key(),  lightringLeds,  System.currentTimeMillis());
