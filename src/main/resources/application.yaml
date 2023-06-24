@@ -2,6 +2,9 @@ quarkus:
   kafka-streams:
     application-id: turtlebots4
     topics: roskafka-hazards,kafkaros-leds
+    commit:
+      interval:
+        ms: 100
 
 "%dev":
   quarkus:
