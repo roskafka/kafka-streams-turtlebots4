@@ -28,3 +28,29 @@ Before starting the application, make sure to create mappings in [roskafka](http
 # run application
 ./mvnw compile quarkus:dev
 ```
+
+Useful commands:
+
+```shell
+# After updating the docker-compose.yml
+docker compose up -d
+
+# Stopping all containers and DELETING all data (careful)
+docker compose down -v
+```
+
+To interact with kafka, open a shell inside the kafka container or do both in one:
+
+```shell
+docker compose exec -it broker /bin/bash
+kafka-topics --bootstrap-server localhost:9092 --list
+
+# Or in one line
+docker compose exec -it broker kafka-topics --bootstrap-server localhost:9092 --list
+```
+
+Topics can be created using the `create_kafka_topics.sh` script:
+
+```shell
+/bin/bash create_kafka_topics.sh
+```
