@@ -83,7 +83,7 @@ public class Ex {
                             leds.add(new LedColor(0, 255, 0));
                         }
                     }
-                    Header header = new Header(new Time((int) System.currentTimeMillis(), 0), "0");
+                    Header header = new Header(new Time((int) (System.currentTimeMillis() / 1000), 0), "0");
                     return new KeyValue<>(key, new LightringLeds(header, leds, true));
                 })
                 .peek((key, value) -> logger.info("final key: {}, value: {}", key, value))
