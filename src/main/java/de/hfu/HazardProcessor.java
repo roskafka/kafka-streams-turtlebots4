@@ -1,14 +1,10 @@
 package de.hfu;
 
-import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.api.Processor;
 import org.apache.kafka.streams.processor.api.ProcessorContext;
 import org.apache.kafka.streams.processor.api.Record;
 import org.apache.kafka.streams.state.KeyValueStore;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HazardProcessor implements Processor<Windowed<String>, String, String, String> {
 
